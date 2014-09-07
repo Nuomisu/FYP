@@ -23,7 +23,7 @@ namespace Joint{
 		Vector3 jointPosOfPaInPa;
 		Vector3 jointPosOfChiInPa;
 
-		bool enable = true;
+		bool enable = false;
 		bool enableMove = true;
 		bool enableRotate = false;
 		//public bool startRotate = false;
@@ -31,9 +31,9 @@ namespace Joint{
 		float distance = 0.0F;
 		float distaneX, distancY, distanceZ;
 
-		float rotateAngleByX;
-		float rotateAngleByY;
-		float rotateAngleByZ;
+		private float rotateAngleByX;
+		private float rotateAngleByY;
+		private float rotateAngleByZ;
 		bool rotateByX; // rotateVector = (1, 0, 0)
 		bool rotateByY; // rotateVector = (0, 1, 0)
 		bool rotateByZ; // rotateVector = (0, 0, 1)
@@ -281,10 +281,12 @@ namespace Joint{
 
 		public void prepareLocalJointPosOfChild(){
 
-				jointLocalPosOfChild.x = 0f / child.componentSize.x;
-				jointLocalPosOfChild.y = (0f - parent.componentSize.y/2)/child.componentSize.y;
-				jointLocalPosOfChild.z = 0f / child.componentSize.z;
-
+				jointLocalPosOfChild.x = jointRawLocalPosOfChild.x / child.componentSize.x;
+				jointLocalPosOfChild.y = (jointRawLocalPosOfChild.y - child.componentSize.y/2)/child.componentSize.y;
+				jointLocalPosOfChild.z = jointRawLocalPosOfChild.z / child.componentSize.z;
+			//jointLocalPosOfChild.x = 0f;
+			//jointLocalPosOfChild.y = -0.5f;
+			//jointLocalPosOfChild.z = 0f;
 		}
 
 		public Vector3 getJointLocalPosOfParent(){
@@ -299,6 +301,25 @@ namespace Joint{
 		}
 		public Vector3 getJointRawLocalPosOfChild(){
 			return jointRawLocalPosOfChild;
+		}
+
+		public void setRotateAngleByX(float angleX){
+			rotateAngleByX = angleX;
+		}
+		public void setRotateAngleByY(float angleY){
+			rotateAngleByY = angleY;
+		}
+		public void setRotateAngleByZ(float angleZ){
+			rotateAngleByZ = angleZ;
+		}
+		public float getRotateAngleByX(){
+			return rotateAngleByX;
+		}
+		public float getRotateAngleByY(){
+			return rotateAngleByY;
+		}
+		public float getRotateAngleByZ(){
+			return rotateAngleByZ;
 		}
 	}
 }

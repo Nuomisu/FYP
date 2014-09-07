@@ -40,7 +40,7 @@
 				<joint_pos_child>
 					<x>0.000000</x>
 					<y>0.000000</y>
-					<z>50.000000</z>
+					<z>0.000000</z>
 				</joint_pos_child>
 				<bone_type>center_bone</bone_type>
 				<rotation_about_xyz>
@@ -65,8 +65,8 @@
 				</joint_pos_parent>
 				<joint_pos_child>
 					<x>0.000000</x>
-					<y>20.000000</y>
-					<z>40.000000</z>
+					<y>0.000000</y>
+					<z>0.000000</z>
 				</joint_pos_child>
 				<bone_type>side_bone</bone_type>
 				<rotation_about_xyz>
@@ -92,7 +92,7 @@
 						<joint_pos_child>
 							<x>0.000000</x>
 							<y>0.000000</y>
-							<z>28.799995</z>
+							<z>0.799995</z>
 						</joint_pos_child>
 						<bone_type>side_bone</bone_type>
 						<rotation_about_xyz>
@@ -119,7 +119,7 @@
 				</joint_pos_parent>
 				<joint_pos_child>
 					<x>0.000000</x>
-					<y>-11.600000</y>
+					<y>0.000000</y>
 					<z>0.000000</z>
 				</joint_pos_child>
 				<bone_type>side_bone</bone_type>
@@ -146,7 +146,7 @@
 						<joint_pos_child>
 							<x>0.000000</x>
 							<y>0.000000</y>
-							<z>23.600002</z>
+							<z>0.600002</z>
 						</joint_pos_child>
 						<bone_type>side_bone</bone_type>
 						<rotation_about_xyz>

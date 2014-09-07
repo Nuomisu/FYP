@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 
+
 public class first : MonoBehaviour {
 
 	public GameObject obj0,obj1,obj2,obj3,obj4,obj5;
@@ -44,17 +45,42 @@ public class first : MonoBehaviour {
 	private Stack mystack = new Stack();
 	private component currentbone = null;
 	//private component tempBone = null;
-
+	
+	//private Dictionary<string, joint> jointMap = new Dictionary<string, joint> ();
+	private Dictionary<string, Dictionary<string, joint>> jointMap = new Dictionary<string, Dictionary<string, joint>> ();
 	private List<joint> jointList = new List<joint>();
 	private joint currentJoint = null;
+
+	private joint getJointByTwoName(string parent, string child)
+	{
+		return jointMap[parent][child];
+	}
+
+	private void getJointSequence(string start, Dictionary<string, Dictionary<string, joint>> myMap){
+		if (myMap.ContainsKey (start)) {
+			Dictionary<string, joint> temp = myMap [start];
+			foreach(KeyValuePair<string, joint> entry in temp) {
+				jointList.Add(entry.Value);
+				getJointSequence(entry.Key, myMap);
+			}
+		}
+	}
+
 
 	void Start() {
 
 		readXML ();
 
+		getJointSequence (root.getName(), jointMap);
 
+		foreach (joint temp in jointList) {
+			Debug.Log( "=====JointList: parent and child" +temp.getJointParentName()+" "+temp.getJointChildName());	
+		}
 
 		startTime = Time.time;
+
+		jointList [0].prepare ();
+		jointList [0].setJointEnableTrue ();
 
 		//clone0 = (GameObject)Instantiate(obj0, new Vector3(0f,0f,0f), Quaternion.identity);
 		//Instantiate(obj1, new Vector3(0,0,0), Quaternion.identity);
@@ -73,7 +99,7 @@ public class first : MonoBehaviour {
 		//hand = new component (clone2);
 		//hand.positionXYZ (new Vector3(0,0,0));
 		//Debug.Log (hand.getPosition());
-
+		/*
 
 		Torso = new component("Torso", new Color(1, 0, 0));
 		Torso.positionXYZ(new Vector3(-0.06565475f, -4.979904f, 0.9601841F));
@@ -136,7 +162,7 @@ public class first : MonoBehaviour {
 		localJointOnChild = new Vector3 (0/20.874100f, (0- 41.781197f/2)/ 41.781197f, 0/20.905399f);
 		legLeg2 = new joint (leg, leg2, localJointOnParent, localJointOnChild, 0f, 0f, 0f);
 
-		legLeg2.setJointEnableFalse (); 
+		legLeg2.setJointEnableFalse (); */
 	}
 
 	void Update(){
@@ -145,6 +171,33 @@ public class first : MonoBehaviour {
 	//	Debug.Log (handHand2.jointEnable());
 
 
+		for (int i = 0; i< jointList.Count; i++) {
+			joint temp = jointList[i];
+			if (temp.jointEnable()){
+
+				if (temp.jointMoveEnable()){
+					temp.move(startTime);
+				}
+
+				if (temp.jointRotateEnable()){
+					if (i < jointList.Count-1){
+
+						if (temp.rotate()){
+							jointList[i+1].prepare();
+							jointList[i+1].setJointEnableTrue();
+							startTime = Time.time;
+							//Debug.Log("Enable torsoHand");
+						}
+					} else {
+						temp.rotate();
+					}
+				}
+			}
+		}
+
+
+
+		/*
 		if ( torsoHead.jointEnable() ) {
 			//Debug.Log ("joint 1");
 			if (torsoHead.jointMoveEnable()){
@@ -238,7 +291,7 @@ public class first : MonoBehaviour {
 				//Debug.Log(torsoHead.enableRotate);
 				legLeg2.rotate();
 			}
-		}
+		}*/
 	}
 
 	private void readXML(){
@@ -371,7 +424,29 @@ public class first : MonoBehaviour {
 				} 
 				else if (reader.Name.ToString() == rotation_about_xyz)
 				{
-
+					int i =0;
+					for (;i<3;){
+						reader.Read();
+						
+						if (reader.NodeType == XmlNodeType.Text){
+							
+							if (i == 0){
+								
+								currentJoint.setRotateAngleByX(float.Parse(reader.Value.ToString(), CultureInfo.InvariantCulture.NumberFormat));
+								i = i+1;
+							}
+							else if (i == 1){
+								currentJoint.setRotateAngleByZ(float.Parse(reader.Value.ToString(), CultureInfo.InvariantCulture.NumberFormat));
+								
+								i = i+1;
+							}
+							else if (i == 2){
+								currentJoint.setRotateAngleByY(float.Parse(reader.Value.ToString(), CultureInfo.InvariantCulture.NumberFormat));
+								
+								i = i+1;
+							}
+						}
+					}
 				} 
 				else if (reader.Name.ToString() == children)
 				{
@@ -407,7 +482,22 @@ public class first : MonoBehaviour {
 						Debug.Log("~~~~~~~start prepare local pos of joint");
 						currentJoint.prepareLocalJointPosOfParent();
 						currentJoint.prepareLocalJointPosOfChild();
-						jointList.Add(currentJoint);
+						//Debug.Log();
+
+
+						//jointMap.Add(temp, currentJoint);
+						//jointList.Add(currentJoint);
+
+
+						if(jointMap.ContainsKey(currentJoint.getJointParentName())){
+						   jointMap[currentJoint.getJointParentName()].Add(currentJoint.getJointChildName(), currentJoint);
+						}
+						else {
+							Dictionary<string, joint> tempMap = new Dictionary<string, joint>();
+							tempMap.Add(currentJoint.getJointChildName(), currentJoint);
+							jointMap.Add(currentJoint.getJointParentName(), tempMap);
+						}
+
 					}
 
 				} else if (reader.Name.ToString() == joint_pos_child)
@@ -430,13 +520,26 @@ public class first : MonoBehaviour {
 			}
 		} 
 
-		for (int i =0; i<jointList.Count; i++) {
-			Debug.Log("Joint "+i+" parent name:"+jointList[i].getJointParentName());	
-			Debug.Log("Joint "+i+" child name:"+jointList[i].getJointChildName());
-			Debug.Log("Joint "+i+" parent local joint pos:"+jointList[i].getJointRawLocalPosOfParent());
-			Debug.Log("Joint "+i+" parent local joint pos:"+jointList[i].getJointLocalPosOfParent());
-			Debug.Log("Joint "+i+" child local joint pos:"+jointList[i].getJointRawLocalPosOfChild());
-			Debug.Log("Joint "+i+" child local joint pos:"+jointList[i].getJointLocalPosOfChild());
+		Debug.Log ("------------------------");
+		foreach(KeyValuePair<string, Dictionary<string, joint>> entry in jointMap)
+		{
+
+			foreach(KeyValuePair<string, joint> entryInner in entry.Value)
+			{
+				Debug.Log ("****************************");
+				Debug.Log("Parent key => " + entry.Key);
+				Debug.Log("Child key => " + entryInner.Key);
+
+				Debug.Log("joint parent&child => "+ entryInner.Value.getJointParentName()+ entryInner.Value.getJointChildName());
+				Debug.Log("joint pos in parent => "+entryInner.Value.getJointRawLocalPosOfParent());
+				Debug.Log("*joint pos in parent => "+entryInner.Value.getJointLocalPosOfParent());
+				Debug.Log("joint pos in child =>"+entryInner.Value.getJointRawLocalPosOfChild());
+				Debug.Log("*joint pos in child => "+entryInner.Value.getJointLocalPosOfChild());
+				Debug.Log("joint rotation =>"+entryInner.Value.getRotateAngleByX()+" "+entryInner.Value.getRotateAngleByY()+" "+entryInner.Value.getRotateAngleByZ());
+			}
 		}
+		//Debug.Log (jointMap[new KeyValuePair<string, string>("torso", "hand")].getJointParentName());
 	}
+
+
 }
