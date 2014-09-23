@@ -5,8 +5,8 @@ using Component;
 namespace Joint{
 	public class joint{
 
-		public static float moveSpeed = 10.0f;
-		public static float rotateSpeed = 100.0f;
+		public static float moveSpeed = 12.0f;
+		public static float rotateSpeed = 80.0f;
 
 		component parent;
 		component child;
@@ -54,9 +54,9 @@ namespace Joint{
 			rotateAngleByX = 0.0F;
 			rotateAngleByY = 0.0F;
 			rotateAngleByZ = 0.0F;
-			rotateByX = false;
-			rotateByY = false;
-			rotateByZ = false;
+			rotateByX = true;
+			rotateByY = true;
+			rotateByZ = true;
 		}
 
 		public joint(component pa, component chi, Vector3 jointLocalPosPa, Vector3 jointLocalPosChi,
@@ -105,29 +105,29 @@ namespace Joint{
 			rotateAngleByX = rotateAngleByX + parent.getRotationAngleX();
 			rotateAngleByY = rotateAngleByY + parent.getRotationAngleY();
 			rotateAngleByZ = rotateAngleByZ + parent.getRotationAngleZ();
-			Debug.Log ("Rotation X "+rotateAngleByX);
-			Debug.Log ("Rotation Y "+rotateAngleByY);
-			Debug.Log ("Rotation Z "+rotateAngleByZ);
-			child.setRotationXYZ (rotateAngleByX, rotateAngleByY, rotateAngleByZ);
+			//Debug.Log ("Rotation X "+rotateAngleByX);
+			//Debug.Log ("Rotation Y "+rotateAngleByY);
+			//Debug.Log ("Rotation Z "+rotateAngleByZ);
+			//child.setRotationXYZ (rotateAngleByX, rotateAngleByY, rotateAngleByZ);
 
 			if (rotateAngleByX > 0) {
-				rotateXVector = Vector3.down;
+				rotateXVector = Vector3.left;
 			} else {
-				rotateXVector = Vector3.up;
+				rotateXVector = Vector3.right;
 				rotateAngleByX = Mathf.Abs(rotateAngleByX);
 			}
 
 			if (rotateAngleByY > 0) {
-				rotateYVector = Vector3.left;
+				rotateYVector = Vector3.back;
 			} else {
-				rotateYVector = Vector3.right;
+				rotateYVector = Vector3.forward;
 				rotateAngleByY = Mathf.Abs(rotateAngleByY);
 			}
 
 			if (rotateAngleByZ > 0) {
-				rotateZVector = Vector3.back;
+				rotateZVector = Vector3.down;
 			} else {
-				rotateZVector = Vector3.forward;
+				rotateZVector = Vector3.up;
 				rotateAngleByZ = Mathf.Abs(rotateAngleByZ);
 			}
 
@@ -138,8 +138,8 @@ namespace Joint{
 
 			Vector3 endpos = childPosition + (jointWorldPosParent - jointWorldPosChild);
 
-			Debug.Log ("Start at: " + childPosition);
-			Debug.Log ("End at: " + endpos);
+			//Debug.Log ("Start at: " + childPosition);
+			//Debug.Log ("End at: " + endpos);
 			//Debug.Log ("Joint Prepare: Rotate X Vector: " + rotateXVector);
 			//Debug.Log ("Joint Prepare: Rotate Y Vector: " + rotateYVector);
 			//Debug.Log ("Joint Prepare: Rotate Z Vector: " + rotateZVector);
@@ -154,7 +154,7 @@ namespace Joint{
 			//Debug.Log ("Child position: "+ childPosition);
 			//Debug.Log ("Child end position: "+ endpos);
 
-			child.lerp (fracJourney, childPosition, endpos);
+			child.lerp (fracJourney, childPosition, endpos, true);
 
 			if (fracJourney > 1.0F){
 				//Debug.Log("I am here.");
@@ -173,8 +173,8 @@ namespace Joint{
 			if (rotateByX && !rotateByY && !rotateByZ){
 				//Debug.Log("Rotate by x");
 				angleCovered = angleCovered + rotateSpeed * Time.deltaTime;
-
-				child.rotateAround(jointWorldPosParent, rotateXVector, rotateSpeed * Time.deltaTime);	
+				Vector3 worldRotateXVector = child.getTransform().TransformDirection(rotateXVector);
+				child.rotateAround(jointWorldPosParent, worldRotateXVector, rotateSpeed * Time.deltaTime);	
 
 				if (angleCovered >= rotateAngleByX) {
 					rotateByX = false;
@@ -185,8 +185,8 @@ namespace Joint{
 			if (!rotateByX && rotateByY && !rotateByZ){
 				//Debug.Log("Rotate by y");
 				angleCovered = angleCovered + rotateSpeed * Time.deltaTime;
-
-				child.rotateAround(jointWorldPosParent, rotateYVector, rotateSpeed * Time.deltaTime);	
+				Vector3 worldRotateYVector = child.getTransform().TransformDirection(rotateZVector);
+				child.rotateAround(jointWorldPosParent, worldRotateYVector, rotateSpeed * Time.deltaTime);	
 				
 				if (angleCovered >= rotateAngleByY) {
 					rotateByY = false;
@@ -197,8 +197,8 @@ namespace Joint{
 			if (!rotateByX && !rotateByY && rotateByZ){
 				//Debug.Log("Rotate by z");
 				angleCovered = angleCovered + rotateSpeed * Time.deltaTime;
-
-				child.rotateAround(jointWorldPosParent, rotateZVector, rotateSpeed * Time.deltaTime);	
+				Vector3 worldRotateZVector = child.getTransform().TransformDirection(rotateXVector);
+				child.rotateAround(jointWorldPosParent, worldRotateZVector, rotateSpeed * Time.deltaTime);	
 				
 				if (angleCovered >= rotateAngleByZ) {
 					rotateByZ = false;
@@ -272,7 +272,7 @@ namespace Joint{
 
 		public void prepareLocalJointPosOfParent(){
 
-				Debug.Log ("Enter prepare");
+				//Debug.Log ("Enter prepare");
 				jointLocalPosOfParent.x = jointRawLocalPosOfParent.x / parent.componentSize.x;
 				jointLocalPosOfParent.y = (jointRawLocalPosOfParent.y - parent.componentSize.y/2)/parent.componentSize.y;
 				jointLocalPosOfParent.z = jointRawLocalPosOfParent.z / parent.componentSize.z;

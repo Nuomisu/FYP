@@ -47,8 +47,12 @@
   </ItemGroup>
   <ItemGroup>
      <Compile Include="Assets\c＃\component.cs" />
+     <Compile Include="Assets\c＃\cutter.cs" />
      <Compile Include="Assets\c＃\first.cs" />
      <Compile Include="Assets\c＃\joint.cs" />
+     <Compile Include="Assets\c＃\myCutter.cs" />
+     <Compile Include="Assets\tryCutter.cs" />
+     <None Include="Assets\Object Cutter\readme.txt" />
      <None Include="Assets\Standard Assets\Skyboxes\_skybox info.txt" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

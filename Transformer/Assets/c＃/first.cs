@@ -6,18 +6,17 @@ using System.Xml;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using UnityEditor;
 
 
 public class first : MonoBehaviour {
 
-	public GameObject obj0,obj1,obj2,obj3,obj4,obj5;
+	//public GameObject mesh_local_0, mesh1, mesh2, mesh3, mesh4, mesh5;
+	//public GameObject obj0,obj1,obj2,obj3,obj4,obj5;
 
 	private GameObject clone0, clone2;
-	//public component Torso, head, hand2;
-	public component Torso, head, hand, hand2, leg, leg2;
-	public joint torsoHand, torsoHead, handHand2, torsoLeg, legLeg2;
+	
 
-	public GameObject handP;
 	private float startTime;
 	private bool resetTime = false;
 	private bool othersCanMove = true;
@@ -26,151 +25,75 @@ public class first : MonoBehaviour {
 	private List<Vector3> position = new List<Vector3>();
 	private List<Vector3> scale = new List<Vector3>();
 
+
+
+	const string bone = "bone";
+	const string bone_properties = "bone_properties";
+	const string bone_name = "bone_name";
+	const string bone_size = "bone_size";
+	const string joint_pos_parent = "joint_pos_parent";
+	const string joint_pos_child = "joint_pos_child";
+	const string bone_type = "bone_type";
+	const string rotation_about_xyz = "rotation_about_xyz";
+	const string children = "children";
+	const string x_ = "x";
+	const string y_ = "y";
+	const string z_ = "z";
+
+	const string original_mesh_path_name = "original_mesh_path_name";
+	const string skeleton_mesh_path_name = "skeleton_mesh_path_name";
+	const string mesh_cut_part = "mesh_cut_part";
+	const string polygon_name = "polygon_name";
+	const string origin = "origin";
+	const string bone_coord_respect_to_world = "bone_coord_respect_to_world";
+	const string local_x_repect_to_wolrd = "local_x_repect_to_wolrd";
+	const string local_y_repect_to_wolrd = "local_y_repect_to_wolrd";
+	const string local_z_repect_to_wolrd = "local_z_repect_to_wolrd";
+
+	/// <summary>
+	/// The mystack: help to store children infor in component
+	/// </summary>
+	private Stack mystack = new Stack();
+	/// <summary>
+	/// The component map: help to find component by name
+	/// </summary>
+	private Dictionary<string, component> componentMap = new Dictionary<string, component> ();
+	private List<component> componentList = new List<component>();
+	private component currentbone = null;
+	/// <summary>
+	/// The root: component tree structure 
+	/// </summary>
 	private component root = null;
 
-	private string bone = "bone";
-	private string bone_properties = "bone_properties";
-	private string bone_name = "bone_name";
-	private string bone_size = "bone_size";
-	private string joint_pos_parent = "joint_pos_parent";
-	private string joint_pos_child = "joint_pos_child";
-	private string bone_type = "bone_type";
-	private string rotation_about_xyz = "rotation_about_xyz";
-	private string children = "children";
-	private string x_ = "x";
-	private string y_ = "y";
-	private string z_ = "z";
-	
-
-	private Stack mystack = new Stack();
-	private component currentbone = null;
-	//private component tempBone = null;
-	
-	//private Dictionary<string, joint> jointMap = new Dictionary<string, joint> ();
+	/// <summary>
+	/// The joint map: help to find joint by name
+	/// </summary>
 	private Dictionary<string, Dictionary<string, joint>> jointMap = new Dictionary<string, Dictionary<string, joint>> ();
 	private List<joint> jointList = new List<joint>();
 	private joint currentJoint = null;
 
-	private joint getJointByTwoName(string parent, string child)
-	{
-		return jointMap[parent][child];
-	}
-
-	private void getJointSequence(string start, Dictionary<string, Dictionary<string, joint>> myMap){
-		if (myMap.ContainsKey (start)) {
-			Dictionary<string, joint> temp = myMap [start];
-			foreach(KeyValuePair<string, joint> entry in temp) {
-				jointList.Add(entry.Value);
-				getJointSequence(entry.Key, myMap);
-			}
-		}
-	}
 
 
 	void Start() {
 
-		readXML ();
 
+		readXML1 ();
+		readXML2 ();
+		// store joint by the sequence into jointList
 		getJointSequence (root.getName(), jointMap);
 
-		foreach (joint temp in jointList) {
-			Debug.Log( "=====JointList: parent and child" +temp.getJointParentName()+" "+temp.getJointChildName());	
-		}
+		//testAndDebug ();
+
 
 		startTime = Time.time;
 
 		jointList [0].prepare ();
 		jointList [0].setJointEnableTrue ();
 
-		//clone0 = (GameObject)Instantiate(obj0, new Vector3(0f,0f,0f), Quaternion.identity);
-		//Instantiate(obj1, new Vector3(0,0,0), Quaternion.identity);
-		//clone2 = (GameObject)Instantiate(obj2, new Vector3(0f,0f,0f), Quaternion.identity);
-		//Instantiate(obj3, new Vector3(0,0,0), Quaternion.identity);
-		//Instantiate(obj4, new Vector3(0,0,0), Quaternion.identity);
-		//Instantiate(obj5, new Vector3(0,0,0), Quaternion.identity);
-
-		//handP = new GameObject ();
-		//handP.name = "handWrapper";
-
-		//clone2.name = "hand";
-		//clone2.transform.parent = handP.transform;
-		//clone2.transform.localPosition = new Vector3 (0,0,50);
-
-		//hand = new component (clone2);
-		//hand.positionXYZ (new Vector3(0,0,0));
-		//Debug.Log (hand.getPosition());
-		/*
-
-		Torso = new component("Torso", new Color(1, 0, 0));
-		Torso.positionXYZ(new Vector3(-0.06565475f, -4.979904f, 0.9601841F));
-		Torso.scaleV3 (new Vector3 (22.789801f,  49.377800f,34.184700f));
-
-		head = new component("head", new Color(0, 1, 0));
-		head.positionXYZ(new Vector3(-0.09509087f, 20.58524f, 3.715981f));
-		head.scaleV3 (new Vector3 (22.789801f,  14.836999f, 22.789780f));
-
-		hand = new component("hand", new Color(1, 1, 0));
-		hand.positionXYZ (new Vector3(10.21297f, 16.50324f, -10.25298f));
-		hand.scaleV3 (new Vector3 (20.881901f,  26.588009f, 20.905399f));
-
-		hand2 = new component("hand2", new Color(1, 0.7f, 0));
-		hand2.positionXYZ (new Vector3(9.646242f, -11.17308f, -10.06381f));
-		hand2.scaleV3 (new Vector3 (20.882000f,  37.982880f, 20.911100f));
-
-		leg = new component("leg", new Color(0 , 0, 1));
-		leg.positionXYZ (new Vector3(10.15125f, 19.20372f, 9.9681f));
-		leg.scaleV3 (new Vector3 (20.546900f,  23.123299f, 20.873301f));
-		
-		leg2 = new component("leg2", new Color(0 , 0.6f, 1));
-		leg2.positionXYZ (new Vector3(10.41975f, -9.690727f, 10.45223f));
-		leg2.scaleV3 (new Vector3 (20.874100f,  41.781197f, 20.903000f));
-		//torsohand = new joint (Torso, hand);
-
-		Vector3 localJointOnParent = new Vector3 ( 0/22.789801f, (50- 49.377800f/2)/50f, 0/34.184700f);
-		Vector3 localJointOnChild = new Vector3 (0/22.789801f, (0- 14.836999f/2)/14.836999f, 0/22.789780f);
-			//(joint.x / parent.length_x, (joint.y-parent.length_y/2)/parent.length_y, joint.z/parent.length_z)
-		torsoHead = new joint (Torso, head, localJointOnParent, localJointOnChild, 0f, 0f, 0f);
-		torsoHead.prepare ();
-		torsoHead.setJointEnableTrue ();
-
-
-		localJointOnParent = new Vector3 ( 0/22.789801f, (40 - 49.377800f/2)/50f, 20/34.184700f);
-		localJointOnChild = new Vector3 (0/20.881901f, (0 - 26.588009f/2)/26.588009f, 0/20.905399f);
-		torsoHand = new joint (Torso, hand, localJointOnParent, localJointOnChild, 0f, 0f, -45f);
-
-		torsoHand.setJointEnableFalse ();
-
-
-		localJointOnParent = new Vector3 ( 0/20.881901f, (28- 26.588009f/2)/26.588009f, 0/20.905399f);
-		localJointOnChild = new Vector3 (0/20.8820f, (0- 37.982880f/2)/37.982880f, 0/20.911100f);
-		Debug.Log ("localJointOnParent: "+localJointOnParent);
-		Debug.Log ("localJointOnChild: "+localJointOnChild);
-		handHand2 = new joint (hand, hand2, localJointOnParent, localJointOnChild, 0f, 0f, 0f);
-
-		handHand2.setJointEnableFalse ();
-
-
-		localJointOnParent = new Vector3 ( 0/22.789801f, (-11.6f-49.377800f/2)/49.377800f, 0/34.184700f);
-		localJointOnChild = new Vector3 (0/20.546900f, (0- 23.123299f/2)/23.123299f, 0/20.903000f);
-		torsoLeg = new joint (Torso, leg, localJointOnParent, localJointOnChild, 0f, 0f, 180f);
-		Debug.Log ("Torso and leg: local joint parent "+localJointOnParent);
-		Debug.Log ("Torso and leg: local joint child "+localJointOnChild);
-		torsoLeg.setJointEnableFalse ();
-
-
-		localJointOnParent = new Vector3 (0 / 20.546900f, (23 - 23.123299f / 2) / 23.123299f, 0/ 20.873301f);
-		localJointOnChild = new Vector3 (0/20.874100f, (0- 41.781197f/2)/ 41.781197f, 0/20.905399f);
-		legLeg2 = new joint (leg, leg2, localJointOnParent, localJointOnChild, 0f, 0f, 0f);
-
-		legLeg2.setJointEnableFalse (); */
 	}
 
 	void Update(){
-		//Debug.Log (torsoHead.jointEnable());
-	//	Debug.Log (torsoHand.jointEnable());
-	//	Debug.Log (handHand2.jointEnable());
-
-
+	
 		for (int i = 0; i< jointList.Count; i++) {
 			joint temp = jointList[i];
 			if (temp.jointEnable()){
@@ -186,7 +109,6 @@ public class first : MonoBehaviour {
 							jointList[i+1].prepare();
 							jointList[i+1].setJointEnableTrue();
 							startTime = Time.time;
-							//Debug.Log("Enable torsoHand");
 						}
 					} else {
 						temp.rotate();
@@ -194,107 +116,119 @@ public class first : MonoBehaviour {
 				}
 			}
 		}
-
-
-
-		/*
-		if ( torsoHead.jointEnable() ) {
-			//Debug.Log ("joint 1");
-			if (torsoHead.jointMoveEnable()){
-				//Debug.Log ("joint 1 move");
-				//Debug.Log (distCovered);
-				torsoHead.move(startTime);
-			}
-
-			if (torsoHead.jointRotateEnable()){
-
-				//Debug.Log(torsoHead.enableRotate);
-				if (torsoHead.rotate()){
-					torsoHand.prepare();
-					torsoHand.setJointEnableTrue();
-					startTime = Time.time;
-					Debug.Log("Enable torsoHand");
-				}
-
-			}
-		} 
-
-		if (torsoHand.jointEnable() ) {
-		
-			//Debug.Log ("joint 2");
-			if (torsoHand.jointMoveEnable()){
-				
-				//Debug.Log (distCovered);
-				torsoHand.move(startTime);
-			}
-			
-			if (torsoHand.jointRotateEnable()){
-				//Debug.Log("I am in the rorate");
-				//Debug.Log(torsoHead.enableRotate);
-				//Debug.Log(torsoHead.enableRotate);
-				if (torsoHand.rotate()){
-					handHand2.prepare();
-					handHand2.setJointEnableTrue();
-					startTime = Time.time;
-					Debug.Log("Enable handHand2");
-				}
-			}
-		}
-
-		if (handHand2.jointEnable() ) {
-			//Debug.Log ("joint 3");
-			if (handHand2.jointMoveEnable()){
-				
-				//Debug.Log (distCovered);
-				handHand2.move(startTime);
-			}
-			
-			if (handHand2.jointRotateEnable()){
-				//Debug.Log(torsoHead.enableRotate);
-				if (handHand2.rotate()){
-					torsoLeg.prepare();
-					torsoLeg.setJointEnableTrue();
-					startTime = Time.time;
-					Debug.Log("Enable torsoLog");
-				}
-			}
-		}
-
-		if (torsoLeg.jointEnable() ) {
-			//Debug.Log ("joint 3");
-			if (torsoLeg.jointMoveEnable()){
-				
-				//Debug.Log (distCovered);
-				torsoLeg.move(startTime);
-			}
-			
-			if (torsoLeg.jointRotateEnable()){
-				//Debug.Log(torsoHead.enableRotate);
-				if (torsoLeg.rotate()){
-					legLeg2.prepare();
-					legLeg2.setJointEnableTrue();
-					startTime = Time.time;
-					Debug.Log("Enable legLeg2");
-				}
-			}
-		}
-
-		if (legLeg2.jointEnable() ) {
-			//Debug.Log ("joint 3");
-			if (legLeg2.jointMoveEnable()){
-				
-				//Debug.Log (distCovered);
-				legLeg2.move(startTime);
-			}
-			
-			if (legLeg2.jointRotateEnable()){
-				//Debug.Log(torsoHead.enableRotate);
-				legLeg2.rotate();
-			}
-		}*/
 	}
 
-	private void readXML(){
+	private joint getJointByTwoName(string parent, string child)
+	{
+		return jointMap[parent][child];
+	}
+	
+	private void getJointSequence(string start, Dictionary<string, Dictionary<string, joint>> myMap){
+		if (myMap.ContainsKey (start)) {
+			Dictionary<string, joint> temp = myMap [start];
+			foreach(KeyValuePair<string, joint> entry in temp) {
+				jointList.Add(entry.Value);
+				getJointSequence(entry.Key, myMap);
+			}
+		}
+	}
+
+
+	
+	private void readXML2(){
+		XmlTextReader reader2 = new XmlTextReader("info.xml");
+
+		string objName = null;
+		string[] seperator = {","};
+
+		string fileName = null;
+		string boneName = null;
+		Vector3 location = new Vector3 ();
+
+		while (reader2.Read()){
+			switch(reader2.NodeType)
+			{
+			case XmlNodeType.Element:
+				if (reader2.Name.ToString() == original_mesh_path_name){
+					reader2.Read();
+					
+					if (reader2.NodeType == XmlNodeType.Text){
+						objName = reader2.Value.ToString();
+						string[] objNameString = objName.Split(seperator, StringSplitOptions.RemoveEmptyEntries);
+						objName = objNameString[0];
+					}
+					else 
+						Debug.Log("Object name Error");
+				} else if (reader2.Name.ToString() == polygon_name){
+					reader2.Read();
+
+					if (reader2.NodeType == XmlNodeType.Text){
+
+						fileName = reader2.Value.ToString();
+					}
+					else 
+						Debug.Log("File name Error");
+				} else if (reader2.Name.ToString() == bone_name) {
+					reader2.Read();
+					
+					if (reader2.NodeType == XmlNodeType.Text){
+						
+						boneName = reader2.Value.ToString();
+					}
+					else 
+						Debug.Log("Bone name Error");				
+
+				} else if (reader2.Name.ToString() == origin){
+					reader2.Read();
+					if (reader2.NodeType == XmlNodeType.Text){
+						string tempString = reader2.Value.ToString();
+						Debug.Log("Tempstring: "+tempString);
+						string[] splitResult = tempString.Split(seperator, StringSplitOptions.RemoveEmptyEntries);
+						if (splitResult.Length == 3){
+							//Debug.Log(splitResult[0]);
+							//Debug.Log(splitResult[1]);
+							//Debug.Log(splitResult[2]);
+							location.x = float.Parse(splitResult[0], CultureInfo.InvariantCulture.NumberFormat);
+							location.y = float.Parse(splitResult[1], CultureInfo.InvariantCulture.NumberFormat);
+							location.z = float.Parse(splitResult[2], CultureInfo.InvariantCulture.NumberFormat);
+						}
+					}
+
+				} else if (reader2.Name.ToString() == local_x_repect_to_wolrd) {
+				
+				} else if (reader2.Name.ToString() == local_y_repect_to_wolrd) {
+					
+				} else if (reader2.Name.ToString() == local_z_repect_to_wolrd) {
+					
+				}
+
+				break;
+
+			case XmlNodeType.EndElement:
+				if (reader2.Name.ToString() == mesh_cut_part){
+					Debug.Log("filename:"+fileName);
+					GameObject temp = AssetDatabase.LoadAssetAtPath("Assets/newBarrel/"+fileName, typeof(GameObject)) as GameObject;
+					GameObject temp2 =  (GameObject)Instantiate (temp);
+					Debug.Log ("@@:" + temp2.name); //mesh_local_0
+				
+					if (componentMap.ContainsKey(boneName)){
+						componentMap[boneName].setMesh(temp2);
+						componentMap[boneName].meshPrepare(location);
+					}
+
+					if (location != null){
+						//Debug.Log("!@#@!#!!#@!");
+						componentMap[boneName].setPositionXYZ(location);
+					}
+				}
+
+				break;
+			}
+		}
+	}
+
+	private void readXML1(){
+		string[] seperator = {","};
 
 		XmlTextReader reader = new XmlTextReader("skeleton.xml");
 		while(reader.Read())
@@ -303,15 +237,11 @@ public class first : MonoBehaviour {
 			{
 			case XmlNodeType.Element: //The node is an element
 
-
-
 				//Debug.Log(reader.Name.ToString());
 				if (reader.Name.ToString() == (bone))
 				{
-
 					currentbone = new component();
 					//Debug.Log("Create a new bone");
-
 				}
 				else if (reader.Name.ToString() == (bone_properties))
 				{
@@ -335,7 +265,19 @@ public class first : MonoBehaviour {
 				}
 				else if (reader.Name.ToString() == (bone_size))
 				{
+					reader.Read();
+					if (reader.NodeType == XmlNodeType.Text){
+						string tempString = reader.Value.ToString();
+						string[] splitResult = tempString.Split(seperator, StringSplitOptions.RemoveEmptyEntries);
+						if (splitResult.Length == 3){
+							currentbone.componentSize.x = float.Parse(splitResult[0], CultureInfo.InvariantCulture.NumberFormat);
+							currentbone.componentSize.z = float.Parse(splitResult[1], CultureInfo.InvariantCulture.NumberFormat);
+							currentbone.componentSize.y = float.Parse(splitResult[2], CultureInfo.InvariantCulture.NumberFormat);
+						}
+						currentbone.newScaleV3();
+					}
 
+					/*
 					int i =0;
 					for (;i<3;){
 						reader.Read();
@@ -343,55 +285,72 @@ public class first : MonoBehaviour {
 						if (reader.NodeType == XmlNodeType.Text){
 
 							if (i == 0){
-
 								currentbone.componentSize.x = float.Parse(reader.Value.ToString(), CultureInfo.InvariantCulture.NumberFormat);
 								i = i+1;
 							}
 							else if (i == 1){
 								currentbone.componentSize.z = float.Parse(reader.Value.ToString(), CultureInfo.InvariantCulture.NumberFormat);
-
 								i = i+1;
 							}
 							else if (i == 2){
 								currentbone.componentSize.y = float.Parse(reader.Value.ToString(), CultureInfo.InvariantCulture.NumberFormat);
-
 								i = i+1;
 							}
 						}
 					}
-					currentbone.newScaleV3();
+					currentbone.newScaleV3(); */
 				} 
 				else if (reader.Name.ToString() == joint_pos_parent)
 				{
 					currentJoint = new joint();
 
+
+					reader.Read();
+					if (reader.NodeType == XmlNodeType.Text){
+						string tempString = reader.Value.ToString();
+						string[] splitResult = tempString.Split(seperator, StringSplitOptions.RemoveEmptyEntries);
+						if (splitResult.Length == 3){
+							currentJoint.jointRawLocalPosOfParent.x = float.Parse(splitResult[0], CultureInfo.InvariantCulture.NumberFormat);
+							currentJoint.jointRawLocalPosOfParent.z = float.Parse(splitResult[1], CultureInfo.InvariantCulture.NumberFormat);
+							currentJoint.jointRawLocalPosOfParent.y = float.Parse(splitResult[2], CultureInfo.InvariantCulture.NumberFormat);
+						}
+					}
+					/*
 					int i =0;
 					for (;i<3;){
 						reader.Read();
 						
 						if (reader.NodeType == XmlNodeType.Text){
 							
-							if (i == 0){
-								
+							if (i == 0){							
 								currentJoint.jointRawLocalPosOfParent.x = float.Parse(reader.Value.ToString(), CultureInfo.InvariantCulture.NumberFormat);
 								i = i+1;
 							}
 							else if (i == 1){
-								currentJoint.jointRawLocalPosOfParent.z = float.Parse(reader.Value.ToString(), CultureInfo.InvariantCulture.NumberFormat);
-								
+								currentJoint.jointRawLocalPosOfParent.z = float.Parse(reader.Value.ToString(), CultureInfo.InvariantCulture.NumberFormat);								
 								i = i+1;
 							}
 							else if (i == 2){
-								currentJoint.jointRawLocalPosOfParent.y = float.Parse(reader.Value.ToString(), CultureInfo.InvariantCulture.NumberFormat);
-								
+								currentJoint.jointRawLocalPosOfParent.y = float.Parse(reader.Value.ToString(), CultureInfo.InvariantCulture.NumberFormat);						
 								i = i+1;
 							}
 						}
-					}
+					} */
 
 				}
 				else if (reader.Name.ToString() == joint_pos_child)
 				{
+					reader.Read();
+					if (reader.NodeType == XmlNodeType.Text){
+						string tempString = reader.Value.ToString();
+						string[] splitResult = tempString.Split(seperator, StringSplitOptions.RemoveEmptyEntries);
+						if (splitResult.Length == 3){
+							currentJoint.jointRawLocalPosOfChild.x = float.Parse(splitResult[0], CultureInfo.InvariantCulture.NumberFormat);
+							currentJoint.jointRawLocalPosOfChild.z = float.Parse(splitResult[1], CultureInfo.InvariantCulture.NumberFormat);
+							currentJoint.jointRawLocalPosOfChild.y = float.Parse(splitResult[2], CultureInfo.InvariantCulture.NumberFormat);
+						}
+					}
+					/*
 					int i =0;
 					for (;i<3;){
 						reader.Read();
@@ -414,8 +373,8 @@ public class first : MonoBehaviour {
 								i = i+1;
 							}
 						}
-					}
-					//currentJoint.prepareLocalJointPosOfParent();
+					} */
+
 
 				}
 				else if (reader.Name.ToString() == bone_type)
@@ -424,6 +383,17 @@ public class first : MonoBehaviour {
 				} 
 				else if (reader.Name.ToString() == rotation_about_xyz)
 				{
+					reader.Read();
+					if (reader.NodeType == XmlNodeType.Text){
+						string tempString = reader.Value.ToString();
+						string[] splitResult = tempString.Split(seperator, StringSplitOptions.RemoveEmptyEntries);
+						if (splitResult.Length == 3){
+							currentJoint.setRotateAngleByX(float.Parse(splitResult[0], CultureInfo.InvariantCulture.NumberFormat));
+							currentJoint.setRotateAngleByZ(float.Parse(splitResult[1], CultureInfo.InvariantCulture.NumberFormat));
+							currentJoint.setRotateAngleByY(float.Parse(splitResult[2], CultureInfo.InvariantCulture.NumberFormat));
+						}
+					}
+					/*
 					int i =0;
 					for (;i<3;){
 						reader.Read();
@@ -446,13 +416,12 @@ public class first : MonoBehaviour {
 								i = i+1;
 							}
 						}
-					}
+					}*/
 				} 
 				else if (reader.Name.ToString() == children)
 				{
 					mystack.Push(currentbone);
 				}
-
 
 				break;
 
@@ -468,6 +437,8 @@ public class first : MonoBehaviour {
 
 					if (root == null) {
 						root = currentbone;
+					
+						componentMap.Add(currentbone.getName(), currentbone);
 					}
 					else//: put current as stack.peek's children   stack.peek().push(current)
 					{	
@@ -476,19 +447,20 @@ public class first : MonoBehaviour {
 						
 						currentbone.setParent((component)mystack.Peek());
 
+						// save the component of skeleton
+						componentMap.Add(currentbone.getName(), currentbone);
+
+
 						currentJoint.setJointParent((component)mystack.Peek());
 						currentJoint.setJointChild(currentbone);
 
-						Debug.Log("~~~~~~~start prepare local pos of joint");
+						//Debug.Log("~~~~~~~start prepare local pos of joint");
 						currentJoint.prepareLocalJointPosOfParent();
 						currentJoint.prepareLocalJointPosOfChild();
-						//Debug.Log();
+						//Debug.Log("Local pos of joint(pa):" + currentJoint.getJointLocalPosOfParent());
+						//Debug.Log("Local pos of joint(chi):" + currentJoint.getJointLocalPosOfChild());
 
-
-						//jointMap.Add(temp, currentJoint);
-						//jointList.Add(currentJoint);
-
-
+						// save the joint of skeleton
 						if(jointMap.ContainsKey(currentJoint.getJointParentName())){
 						   jointMap[currentJoint.getJointParentName()].Add(currentJoint.getJointChildName(), currentJoint);
 						}
@@ -509,6 +481,10 @@ public class first : MonoBehaviour {
 			}
 		}
 
+	}
+
+	private void testAndDebug(){
+		
 		Debug.Log (root.getName());
 		for (int i = 0; i< root.childrenList.Count; i++) {
 			component temp = root.childrenList[i];
@@ -520,16 +496,30 @@ public class first : MonoBehaviour {
 			}
 		} 
 
+		foreach (joint temp in jointList) {
+			Debug.Log( "=====JointList: parent and child" +temp.getJointParentName()+" "+temp.getJointChildName());	
+		}
+
+		Debug.Log ("####ComponetList");
+		for (int i=0; i<componentList.Count; i++) {
+			Debug.Log("##Name: "+componentList[i].getName());		
+		}
+
 		Debug.Log ("------------------------");
+		foreach (KeyValuePair<string, component> entry in componentMap) {
+			Debug.Log("Name(key): "+entry.Key);
+			Debug.Log("Name(Value): "+entry.Value.getName());
+		}
+
 		foreach(KeyValuePair<string, Dictionary<string, joint>> entry in jointMap)
 		{
-
+			
 			foreach(KeyValuePair<string, joint> entryInner in entry.Value)
 			{
 				Debug.Log ("****************************");
 				Debug.Log("Parent key => " + entry.Key);
 				Debug.Log("Child key => " + entryInner.Key);
-
+				
 				Debug.Log("joint parent&child => "+ entryInner.Value.getJointParentName()+ entryInner.Value.getJointChildName());
 				Debug.Log("joint pos in parent => "+entryInner.Value.getJointRawLocalPosOfParent());
 				Debug.Log("*joint pos in parent => "+entryInner.Value.getJointLocalPosOfParent());
@@ -538,8 +528,7 @@ public class first : MonoBehaviour {
 				Debug.Log("joint rotation =>"+entryInner.Value.getRotateAngleByX()+" "+entryInner.Value.getRotateAngleByY()+" "+entryInner.Value.getRotateAngleByZ());
 			}
 		}
-		//Debug.Log (jointMap[new KeyValuePair<string, string>("torso", "hand")].getJointParentName());
 	}
 
-
+	
 }

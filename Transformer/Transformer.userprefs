@@ -1,0 +1,14 @@
+﻿<Properties>
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
+  <MonoDevelop.Ide.Workbench ActiveDocument="Assets/c＃/first.cs">
+    <Files>
+      <File FileName="Assets/c＃/first.cs" Line="220" Column="34" />
+      <File FileName="Assets/c＃/joint.cs" Line="65" Column="16" />
+      <File FileName="Assets/c＃/component.cs" Line="71" Column="37" />
+    </Files>
+  </MonoDevelop.Ide.Workbench>
+  <MonoDevelop.Ide.DebuggingService.Breakpoints>
+    <BreakpointStore />
+  </MonoDevelop.Ide.DebuggingService.Breakpoints>
+  <MonoDevelop.Ide.DebuggingService.PinnedWatches />
+</Properties>
