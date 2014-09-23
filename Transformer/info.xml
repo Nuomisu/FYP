@@ -1,4 +1,4 @@
-<infor>
+<info>
 	<original_mesh_path_name>barrel.stl</original_mesh_path_name>
 <skeleton_mesh_path_name>skeleton.xml</skeleton_mesh_path_name>
 <mesh_cut_part>
@@ -101,4 +101,4 @@
 		<local_z_repect_to_wolrd>0 , 1 , 0</local_z_repect_to_wolrd>
 	</bone_coord_respect_to_world>
 </mesh_cut_part>
-</infor>
+</info>
