@@ -5,8 +5,8 @@ using Component;
 namespace Joint{
 	public class joint{
 
-		public static float moveSpeed = 12.0f;
-		public static float rotateSpeed = 80.0f;
+		public static float moveSpeed = 10.5f;
+		public static float rotateSpeed = 100.0f;
 
 		component parent;
 		component child;
@@ -118,16 +118,16 @@ namespace Joint{
 			}
 
 			if (rotateAngleByY > 0) {
-				rotateYVector = Vector3.back;
+				rotateYVector = Vector3.down;
 			} else {
-				rotateYVector = Vector3.forward;
+				rotateYVector = Vector3.up;
 				rotateAngleByY = Mathf.Abs(rotateAngleByY);
 			}
 
 			if (rotateAngleByZ > 0) {
-				rotateZVector = Vector3.down;
+				rotateZVector = Vector3.back;
 			} else {
-				rotateZVector = Vector3.up;
+				rotateZVector = Vector3.forward;
 				rotateAngleByZ = Mathf.Abs(rotateAngleByZ);
 			}
 
@@ -140,9 +140,10 @@ namespace Joint{
 
 			//Debug.Log ("Start at: " + childPosition);
 			//Debug.Log ("End at: " + endpos);
-			//Debug.Log ("Joint Prepare: Rotate X Vector: " + rotateXVector);
-			//Debug.Log ("Joint Prepare: Rotate Y Vector: " + rotateYVector);
-			//Debug.Log ("Joint Prepare: Rotate Z Vector: " + rotateZVector);
+			Debug.Log ("Joint: "+getJointParentName()+getJointChildName());
+			Debug.Log ("Joint Prepare: Rotate X Vector: " + rotateXVector);
+			Debug.Log ("Joint Prepare: Rotate Y Vector: " + rotateYVector);
+			Debug.Log ("Joint Prepare: Rotate Z Vector: " + rotateZVector);
 		}
 
 		public void move(float startTime){
@@ -185,7 +186,7 @@ namespace Joint{
 			if (!rotateByX && rotateByY && !rotateByZ){
 				//Debug.Log("Rotate by y");
 				angleCovered = angleCovered + rotateSpeed * Time.deltaTime;
-				Vector3 worldRotateYVector = child.getTransform().TransformDirection(rotateZVector);
+				Vector3 worldRotateYVector = child.getTransform().TransformDirection(rotateYVector);
 				child.rotateAround(jointWorldPosParent, worldRotateYVector, rotateSpeed * Time.deltaTime);	
 				
 				if (angleCovered >= rotateAngleByY) {

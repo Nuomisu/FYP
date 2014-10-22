@@ -163,15 +163,14 @@ public class tryCutter : MonoBehaviour {
 				other.collider.GetComponent<MeshCollider>().sharedMesh = hitedmesh;
 				other.collider.GetComponent<MeshCollider>().convex=true;
 			}
-			
+			/*
 			if(splitonce){
 				newobject.gameObject.tag="splitted";
 				other.collider.gameObject.tag="splitted";
-			}
-			
+			} */
 			if(!newobject.rigidbody){
-				newobject.AddComponent<Rigidbody>();
-				other.collider.gameObject.AddComponent<Rigidbody>();
+				//newobject.AddComponent<Rigidbody>();
+				//other.collider.gameObject.AddComponent<Rigidbody>();
 			}
 		}
 	}

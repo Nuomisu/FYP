@@ -161,8 +161,8 @@ function OnTriggerExit(other : Collider){
 						}
 						
 							if(splitonce){
-							newobject.gameObject.tag="splitted";
-							other.collider.gameObject.tag="splitted";
+							//newobject.gameObject.tag="splitted";
+							//other.collider.gameObject.tag="splitted";
 						}
 						
 						if(!newobject.rigidbody){

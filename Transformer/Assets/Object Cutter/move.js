@@ -1,4 +1,4 @@
-var speed:float=10;
+var speed:float=100;
 
 function Update () {
 transform.position.x -= Input.GetAxis("Horizontal") * Time.deltaTime * speed;

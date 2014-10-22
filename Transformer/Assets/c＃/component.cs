@@ -19,8 +19,6 @@ namespace Component
 
 		public Vector3 componentSize;
 
-		private bool cubeEnable = false;
-
 		public component(){
 			cube = GameObject.CreatePrimitive (PrimitiveType.Cube);	
 			rotationAnglebyX = 0f;
@@ -38,8 +36,6 @@ namespace Component
 			rotationAnglebyZ = 0f;
 		}
 
-
-
 		public component(string name, GameObject obj){
 			cube = obj;
 			cube.name = name;
@@ -48,20 +44,18 @@ namespace Component
 			rotationAnglebyY = 0f;
 			rotationAnglebyZ = 0f;
 		}
-		public component(GameObject obj){
-			cube = obj;
-			//Debug.Log ("In the component: "+cube.transform.position);
-			rotationAnglebyX = 0f;
-			rotationAnglebyY = 0f;
-			rotationAnglebyZ = 0f;
-		}
-
+	
 		public void setMesh(GameObject m){
 			mesh = m;
 		}
 
 		public void cubeUnEnable(){
-			cube.renderer.enabled = false;		
+			cube.renderer.enabled = false;	
+			cube.collider.enabled = false;
+		}
+
+		public void setName(string name){
+			cube.name = name;
 		}
 
 
@@ -80,7 +74,7 @@ namespace Component
 		}
 
 		public Vector3 getPosition(){
-			return cube.transform.position;		
+			return mesh.transform.position;		
 		}
 
 		public Vector3 getLocalPosition(){
@@ -92,20 +86,6 @@ namespace Component
 		}
 		public void translateXYZ(float x, float y, float z){
 			cube.transform .Translate(x, y, z);	
-		}
-
-		public void rotationXYZ(float xAngle, float yAngle, float zAngle, Space relativeTo)
-		{
-			cube.transform.Rotate (xAngle, yAngle, zAngle, relativeTo);
-		}
-		public void rotationXYZ(float xAngle, float yAngle, float zAngle)
-		{
-			cube.transform.Rotate (xAngle, yAngle, zAngle, Space.Self);
-
-		}
-
-		public void scaleV3(Vector3 scale){
-			cube.transform.localScale = scale;
 		}
 
 		public void newScaleV3(){
@@ -154,15 +134,12 @@ namespace Component
 
 			if (childrenList.Count != 0){
 				for (int i = 0; i < childrenList.Count; i++) {
-					Vector3 newStart = childrenList[i].getPosition();
+
 					childrenList[i].lerp(fracJourney, childrenPosStartList[i], childrenPosEndList[i], true);
 				}
 			}
 		}
 
-		/*public void newlerp(float fracJourney, Vector3 start, Vector3 end){
-			cube.transform.position = Vector3.MoveTowards(start, end, fracJourney);	
-		}*/
 
 
 		public void rotateAround(Vector3 point, Vector3 axis, float angle){
@@ -211,9 +188,7 @@ namespace Component
 			childrenList.Add (child);
 		}
 
-		public void setName(string name){
-			cube.name = name;
-		}
+
 
 		public string getName(){
 			return cube.name;
@@ -221,6 +196,10 @@ namespace Component
 
 		public void hideCube(){
 			cube.renderer.enabled = false;
+		}
+
+		public Quaternion getRotation(){
+			return mesh.transform.rotation;
 		}
 	}
 	

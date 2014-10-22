@@ -1,3 +1,5 @@
+#if UNITY_EDITOR 
+
 using UnityEngine;
 using System.Collections;
 using Component;
@@ -11,12 +13,6 @@ using UnityEditor;
 
 public class first : MonoBehaviour {
 
-	//public GameObject mesh_local_0, mesh1, mesh2, mesh3, mesh4, mesh5;
-	//public GameObject obj0,obj1,obj2,obj3,obj4,obj5;
-
-	private GameObject clone0, clone2;
-	
-
 	private float startTime;
 	private bool resetTime = false;
 	private bool othersCanMove = true;
@@ -24,9 +20,7 @@ public class first : MonoBehaviour {
 	private List<string> nameList = new List<string>();
 	private List<Vector3> position = new List<Vector3>();
 	private List<Vector3> scale = new List<Vector3>();
-
-
-
+	
 	const string bone = "bone";
 	const string bone_properties = "bone_properties";
 	const string bone_name = "bone_name";
@@ -72,15 +66,17 @@ public class first : MonoBehaviour {
 	private List<joint> jointList = new List<joint>();
 	private joint currentJoint = null;
 
-
+	public Texture2D btnTexture;
+	public Texture2D btnTexture2;
+	private bool start = false;
 
 	void Start() {
 
 
-		readXML1 ();
-		readXML2 ();
+		//readXML1 ();
+		//readXML2 ();
 		// store joint by the sequence into jointList
-		getJointSequence (root.getName(), jointMap);
+		//getJointSequence (root.getName(), jointMap);
 
 		//testAndDebug ();
 
@@ -92,31 +88,48 @@ public class first : MonoBehaviour {
 
 	}
 
-	void Update(){
+
+	public void OnGUI(){
+
+		if (GUI.Button (new Rect (70, 10, 50, 50), btnTexture)) {
+			start = true;
+		}
+		
+		if (GUI.Button (new Rect (130, 10, 50, 50), btnTexture2)) {
+			start = false;
+		}
+
+
+	} 
 	
-		for (int i = 0; i< jointList.Count; i++) {
-			joint temp = jointList[i];
-			if (temp.jointEnable()){
+	void Update(){
+		if (start){
+			for (int i = 0; i< jointList.Count; i++) {
+				joint temp = jointList[i];
 
-				if (temp.jointMoveEnable()){
-					temp.move(startTime);
-				}
+				if (temp.jointEnable()){
 
-				if (temp.jointRotateEnable()){
-					if (i < jointList.Count-1){
+					if (temp.jointMoveEnable()){
+						temp.move(startTime);
+					}
 
-						if (temp.rotate()){
-							jointList[i+1].prepare();
-							jointList[i+1].setJointEnableTrue();
-							startTime = Time.time;
+					if (temp.jointRotateEnable()){
+						if (i < jointList.Count-1){
+
+							if (temp.rotate()){
+								jointList[i+1].prepare();
+								jointList[i+1].setJointEnableTrue();
+								startTime = Time.time;
+							}
+						} else {
+							temp.rotate();
 						}
-					} else {
-						temp.rotate();
 					}
 				}
-			}
+
+			}	 
 		}
-	}
+	} 
 
 	private joint getJointByTwoName(string parent, string child)
 	{
@@ -136,7 +149,7 @@ public class first : MonoBehaviour {
 
 	
 	private void readXML2(){
-		XmlTextReader reader2 = new XmlTextReader("info.xml");
+		XmlTextReader reader2 = new XmlTextReader(Application.dataPath + "/infoBarrel.xml");
 
 		string objName = null;
 		string[] seperator = {","};
@@ -156,6 +169,7 @@ public class first : MonoBehaviour {
 						objName = reader2.Value.ToString();
 						string[] objNameString = objName.Split(seperator, StringSplitOptions.RemoveEmptyEntries);
 						objName = objNameString[0];
+						Debug.Log("Object name: "+objName);
 					}
 					else 
 						Debug.Log("Object name Error");
@@ -165,6 +179,7 @@ public class first : MonoBehaviour {
 					if (reader2.NodeType == XmlNodeType.Text){
 
 						fileName = reader2.Value.ToString();
+						Debug.Log("File name: "+original_mesh_path_name);
 					}
 					else 
 						Debug.Log("File name Error");
@@ -207,7 +222,8 @@ public class first : MonoBehaviour {
 			case XmlNodeType.EndElement:
 				if (reader2.Name.ToString() == mesh_cut_part){
 					Debug.Log("filename:"+fileName);
-					GameObject temp = AssetDatabase.LoadAssetAtPath("Assets/newBarrel/"+fileName, typeof(GameObject)) as GameObject;
+					GameObject temp = AssetDatabase.LoadAssetAtPath("Assets/CuttingParts/newBarrel/"+fileName, typeof(GameObject)) as GameObject;
+
 					GameObject temp2 =  (GameObject)Instantiate (temp);
 					Debug.Log ("@@:" + temp2.name); //mesh_local_0
 				
@@ -230,7 +246,7 @@ public class first : MonoBehaviour {
 	private void readXML1(){
 		string[] seperator = {","};
 
-		XmlTextReader reader = new XmlTextReader("skeleton.xml");
+		XmlTextReader reader = new XmlTextReader(Application.dataPath + "/skeletonBarrel.xml");
 		while(reader.Read())
 		{
 			switch(reader.NodeType)
@@ -532,3 +548,4 @@ public class first : MonoBehaviour {
 
 	
 }
+#endif

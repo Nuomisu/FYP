@@ -163,8 +163,8 @@ public class cutter : MonoBehaviour {
 			}
 			
 			if(splitonce){
-				newobject.gameObject.tag="splitted";
-				other.collider.gameObject.tag="splitted";
+				//newobject.gameObject.tag="splitted";
+				//other.collider.gameObject.tag="splitted";
 			}
 			
 			if(!newobject.rigidbody){
